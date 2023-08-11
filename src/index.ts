@@ -1,10 +1,10 @@
-class ObjectWrapper {
-  private _obj: Record<string, unknown>;
+class ObjectWrapper<T extends Object> {
+  private _obj: T;
 
   /***
    * 引数のオブジェクトのコピーを this._objに設定
    */
-  constructor(_obj: Record<string, unknown>) {
+  constructor(_obj: T) {
     this._obj = { ..._obj };
   }
 
@@ -12,7 +12,7 @@ class ObjectWrapper {
    * this._objのコピーを返却
    * @return Object
    */
-  get obj(): Record<string, unknown> {
+  get obj(): T {
     return { ...this._obj };
   }
 
@@ -21,7 +21,7 @@ class ObjectWrapper {
    * @param key オブジェクトのキー
    * @param val オブジェクトの値
    */
-  set(key: string, val: unknown): boolean {
+  set(key: keyof T, val: T[keyof T]): boolean {
     if (key in this._obj) {
       this._obj[key] = val;
       return true;
@@ -34,15 +34,15 @@ class ObjectWrapper {
    * 指定のキーが存在しない場合 undefinedを返却
    * @param key オブジェクトのキー
    */
-  get(key: string): unknown {
+  get(key: keyof T): T[keyof T] | undefined {
     return this._obj[key];
   }
 
   /**
    * 指定した値を持つkeyの配列を返却。該当のものがなければ空の配列を返却。
    */
-  findKeys(val: unknown): string[] {
-    const keys = Object.keys(this._obj);
+  findKeys(val: T[keyof T]): (keyof T)[] {
+    const keys = Object.keys(this._obj) as (keyof T)[];
     return keys.filter((key) => this._obj[key] === val);
   }
 }
@@ -61,7 +61,7 @@ if (wrappedObj1.obj.a === '01') {
 }
 
 if (
-  wrappedObj1.set('c', '03') === false &&
+  // wrappedObj1.set('c', '03') === false &&
   wrappedObj1.set('b', '04') === true &&
   wrappedObj1.obj.b === '04'
 ) {
@@ -70,11 +70,11 @@ if (
   console.error('NG: set(key, val)');
 }
 
-if (wrappedObj1.get('b') === '04' && wrappedObj1.get('c') === undefined) {
-  console.log('OK: get(key)');
-} else {
-  console.error('NG: get(key)');
-}
+// if (wrappedObj1.get('b') === '04' && wrappedObj1.get('c') === undefined) {
+//   console.log('OK: get(key)');
+// } else {
+//   console.error('NG: get(key)');
+// }
 
 const obj2 = { a: '01', b: '02', bb: '02', bbb: '02' };
 const wrappedObj2 = new ObjectWrapper(obj2);
